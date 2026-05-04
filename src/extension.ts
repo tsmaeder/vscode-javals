@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';
+import JSZip = require('jszip');
 import {
 	LanguageClient,
 	LanguageClientOptions,
@@ -24,10 +25,17 @@ const JAVAC_JVM_FLAGS: string[] = [
 
 let client: LanguageClient | undefined;
 let outputChannel: vscode.OutputChannel | undefined;
+const JAR_URI_SCHEME = 'jar';
 
 export async function activate(context: vscode.ExtensionContext): Promise<void> {
 	outputChannel = vscode.window.createOutputChannel('JavaLS');
 	context.subscriptions.push(outputChannel);
+	context.subscriptions.push(
+		vscode.workspace.registerTextDocumentContentProvider(
+			JAR_URI_SCHEME,
+			new JarTextDocumentContentProvider(outputChannel),
+		),
+	);
 
 	context.subscriptions.push(
 		vscode.commands.registerCommand('javals.showOutputChannel', () => {
@@ -139,4 +147,62 @@ function isExecutableFile(p: string): boolean {
 	} catch {
 		return false;
 	}
+}
+
+class JarTextDocumentContentProvider implements vscode.TextDocumentContentProvider {
+	public constructor(private readonly channel: vscode.OutputChannel | undefined) {}
+
+	public async provideTextDocumentContent(uri: vscode.Uri): Promise<string | undefined> {
+		const parsed = parseJarUri(uri);
+		if (!parsed) {
+			this.channel?.appendLine(`[javals] unsupported jar uri: ${uri.toString()}`);
+			return undefined;
+		}
+
+		try {
+			const archiveBytes = await fs.promises.readFile(parsed.archiveFsPath);
+			const archive = await JSZip.loadAsync(archiveBytes);
+			const entry = archive.file(parsed.entryPath);
+
+			if (!entry) {
+				this.channel?.appendLine(`[javals] missing jar entry: ${parsed.entryPath}`);
+				return undefined;
+			}
+
+			return await entry.async('string');
+		} catch (err) {
+			const message = err instanceof Error ? err.message : String(err);
+			this.channel?.appendLine(`[javals] failed to load jar uri ${uri.toString()}: ${message}`);
+			return undefined;
+		}
+	}
+}
+
+function parseJarUri(uri: vscode.Uri): { archiveFsPath: string; entryPath: string } | undefined {
+	if (uri.scheme !== JAR_URI_SCHEME) {
+		return undefined;
+	}
+
+	const value = uri.toString();
+	const withoutScheme = value.slice(`${JAR_URI_SCHEME}:`.length);
+	const separatorIndex = withoutScheme.indexOf('!/');
+	if (separatorIndex < 0) {
+		return undefined;
+	}
+
+	const archiveUri = vscode.Uri.parse(withoutScheme.slice(0, separatorIndex));
+	if (archiveUri.scheme !== 'file') {
+		return undefined;
+	}
+
+	const rawEntryPath = withoutScheme.slice(separatorIndex + 2);
+	const entryPath = decodeURIComponent(rawEntryPath).replace(/^\/+/, '');
+	if (!entryPath) {
+		return undefined;
+	}
+
+	return {
+		archiveFsPath: archiveUri.fsPath,
+		entryPath,
+	};
 }
