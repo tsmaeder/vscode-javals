@@ -26,7 +26,7 @@ function bundledJarPath(extensionPath: string): string {
 function devJarPath(extensionPath: string, devProjectPath: string): string {
 	const base = path.isAbsolute(devProjectPath)
 		? devProjectPath
-		: path.resolve(path.dirname(extensionPath), devProjectPath);
+		: path.resolve(extensionPath, devProjectPath);
 	return path.join(base, DEV_JAR_RELATIVE);
 }
 

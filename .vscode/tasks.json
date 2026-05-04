@@ -4,6 +4,20 @@
 	"version": "2.0.0",
 	"tasks": [
 		{
+			"label": "extension: esbuild",
+			"type": "shell",
+			"command": "node esbuild.js",
+			"options": {
+				"cwd": "${workspaceFolder}"
+			},
+			"group": "build",
+			"presentation": {
+				"reveal": "silent",
+				"panel": "shared"
+			},
+			"problemMatcher": []
+		},
+		{
             "label": "watch",
             "dependsOn": [
                 "npm: watch:tsc",
