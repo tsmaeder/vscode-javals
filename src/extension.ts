@@ -21,6 +21,7 @@ const JAVAC_JVM_FLAGS: string[] = [
 	'--add-exports', 'jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED',
 	'--add-opens', 'jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED',
 	'--add-opens', 'jdk.compiler/com.sun.tools.javac.jvm=ALL-UNNAMED',
+	'--add-opens', 'jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED',
 ];
 
 let client: LanguageClient | undefined;
