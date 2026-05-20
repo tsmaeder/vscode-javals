@@ -61,6 +61,8 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
 	const mode = config.get<ServerMode>('serverMode', 'auto');
 	const devProjectPath = config.get<string>('devProjectPath', '../java-ls');
 	const userJvmArgs = config.get<string[]>('jvmArgs', []);
+	const debugWaitForDebugger = config.get<boolean>('debug', false);
+	const debugPort = resolveDebugPort(config);
 
 	let resolved;
 	try {
@@ -87,7 +89,14 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
 	outputChannel?.appendLine(`[javals] mode=${resolved.mode} jar=${resolved.jarPath}`);
 	outputChannel?.appendLine(`[javals] java=${javaExe}`);
 
-	const args = [...JAVAC_JVM_FLAGS, ...userJvmArgs, '-jar', resolved.jarPath];
+	const debugJvmArgs = debugWaitForDebugger
+		? [`-agentlib:jdwp=transport=dt_socket,quiet=y,server=y,suspend=y,address=*:${debugPort}`]
+		: [];
+	if (debugWaitForDebugger) {
+		outputChannel?.appendLine(`[javals] debugger wait enabled on port ${debugPort}`);
+	}
+
+	const args = [...JAVAC_JVM_FLAGS, ...userJvmArgs, ...debugJvmArgs, '-jar', resolved.jarPath];
 	const serverOptions: ServerOptions = {
 		run: { command: javaExe, args, transport: TransportKind.stdio },
 		debug: { command: javaExe, args, transport: TransportKind.stdio },
@@ -141,6 +150,19 @@ function resolveJavaExecutable(configuredJavaHome: string): string | undefined {
 	return binary;
 }
 
+function resolveDebugPort(config: vscode.WorkspaceConfiguration): number {
+	const configuredDebugPort = config.get<number>('debugPort', 9000);
+	if (
+		typeof configuredDebugPort === 'number'
+		&& Number.isInteger(configuredDebugPort)
+		&& configuredDebugPort >= 1
+		&& configuredDebugPort <= 65535
+	) {
+		return configuredDebugPort;
+	}
+	return 9000;
+}
+
 function isExecutableFile(p: string): boolean {
 	try {
 		return fs.statSync(p).isFile();
@@ -183,20 +205,19 @@ function parseJarUri(uri: vscode.Uri): { archiveFsPath: string; entryPath: strin
 		return undefined;
 	}
 
-	const value = uri.toString();
-	const withoutScheme = value.slice(`${JAR_URI_SCHEME}:`.length);
-	const separatorIndex = withoutScheme.indexOf('!/');
+	const fileUri = decodeURI(uri.path);
+	const separatorIndex = fileUri.indexOf('!/');
 	if (separatorIndex < 0) {
 		return undefined;
 	}
 
-	const archiveUri = vscode.Uri.parse(withoutScheme.slice(0, separatorIndex));
+	const archiveUri = vscode.Uri.parse(fileUri.slice(0, separatorIndex));
 	if (archiveUri.scheme !== 'file') {
 		return undefined;
 	}
 
-	const rawEntryPath = withoutScheme.slice(separatorIndex + 2);
-	const entryPath = decodeURIComponent(rawEntryPath).replace(/^\/+/, '');
+	const rawEntryPath = fileUri.slice(separatorIndex + 2);
+	const entryPath = rawEntryPath.replace(/^\/+/, '');
 	if (!entryPath) {
 		return undefined;
 	}

@@ -60,6 +60,18 @@
           "default": [],
           "description": "Extra JVM arguments appended after the required --add-exports/--add-opens flags."
         },
+        "javals.debug": {
+          "type": "boolean",
+          "default": false,
+          "description": "Start JavaLS with JVM debug enabled and suspend startup until a debugger connects."
+        },
+        "javals.debugPort": {
+          "type": "number",
+          "default": 9000,
+          "minimum": 1,
+          "maximum": 65535,
+          "description": "Debug port used when javals.debug is enabled."
+        },
         "javals.trace.server": {
           "type": "string",
           "enum": [
