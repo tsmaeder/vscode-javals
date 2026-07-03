@@ -81,6 +81,16 @@
           ],
           "default": "off",
           "description": "Traces the communication between VS Code and the JavaLS server."
+        },
+        "javals.indexClassFileContents": {
+          "type": "boolean",
+          "default": true,
+          "description": "Whether to index class file contents."
+        },
+        "javals.prunedSourceIndexing": {
+          "type": "boolean",
+          "default": false,
+          "description": "Whether to index only a pruned subset of source files."
         }
       }
     }

@@ -106,6 +106,10 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
 	const clientOptions: LanguageClientOptions = {
 		documentSelector: [{ scheme: 'file', language: 'java' }],
 		outputChannel,
+		initializationOptions: {
+			indexClassFileContents: config.get<boolean>('indexClassFileContents', true),
+			prunedSourceIndexing: config.get<boolean>('prunedSourceIndexing', true),
+		}
 	};
 
 	client = new LanguageClient('javals', 'JavaLS', serverOptions, clientOptions);
