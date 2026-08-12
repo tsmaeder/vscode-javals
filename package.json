@@ -82,15 +82,31 @@
           "default": "off",
           "description": "Traces the communication between VS Code and the JavaLS server."
         },
-        "javals.indexClassFileContents": {
-          "type": "boolean",
-          "default": true,
-          "description": "Whether to index class file contents."
+        "javals.backend.indexer": {
+          "type": "string",
+          "enum": [
+            "javac",
+            "ecj"
+          ],
+          "enumDescriptions": [
+            "Use the javac-based indexer (default).",
+            "Use the Eclipse Compiler for Java (ECJ) indexer."
+          ],
+          "default": "javac",
+          "description": "Which backend to use for indexing."
         },
-        "javals.prunedSourceIndexing": {
-          "type": "boolean",
-          "default": false,
-          "description": "Whether to index only a pruned subset of source files."
+        "javals.backend.compiler": {
+          "type": "string",
+          "enum": [
+            "javac",
+            "ecj"
+          ],
+          "enumDescriptions": [
+            "Use the javac-based compiler (default).",
+            "Use the Eclipse Compiler for Java (ECJ)."
+          ],
+          "default": "javac",
+          "description": "Which backend to use for compilation."
         }
       }
     }

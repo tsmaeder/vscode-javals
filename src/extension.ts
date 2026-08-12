@@ -109,6 +109,10 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
 		initializationOptions: {
 			indexClassFileContents: config.get<boolean>('indexClassFileContents', true),
 			prunedSourceIndexing: config.get<boolean>('prunedSourceIndexing', true),
+			backend: {
+				indexer: config.get<'javac' | 'ecj'>('backend.indexer', 'javac'),
+				compiler: config.get<'javac' | 'ecj'>('backend.compiler', 'javac'),
+			},
 		}
 	};
 
