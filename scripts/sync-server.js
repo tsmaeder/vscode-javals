@@ -1,9 +1,17 @@
 /**
+ * Copyright 2026 by Anysphere Inc.
+ * Licensed under the MIT License.
+ *
+ * Author: Thomas Mäder, Castle Ridge Software
+ *
+ * SPDX-License-Identifier: MIT
+ * 
  * Copies the shaded JavaLS jar from the sibling Maven project into the extension's
  * server/ directory so that `vsce package` (and local runs in bundled mode) can
  * ship/launch it.
  *
  * Invoked via `npm run sync-server`, and also as part of `vscode:prepublish`.
+ *
  */
 const fs = require('fs');
 const path = require('path');

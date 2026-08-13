@@ -1,3 +1,11 @@
+/**
+ * Copyright 2026 by Anysphere Inc.
+ * Licensed under the MIT License.
+ *
+ * Author: Thomas Mäder, Castle Ridge Software
+ *
+ * SPDX-License-Identifier: MIT
+ */
 import * as fs from 'fs';
 import * as path from 'path';
 import * as vscode from 'vscode';

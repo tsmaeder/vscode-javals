@@ -1,3 +1,11 @@
+/**
+ * Copyright 2026 by Anysphere Inc.
+ * Licensed under the MIT License.
+ *
+ * Author: Thomas Mäder, Castle Ridge Software
+ *
+ * SPDX-License-Identifier: MIT
+ */
 import typescriptEslint from "typescript-eslint";
 
 export default [{
