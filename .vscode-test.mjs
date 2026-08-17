@@ -1,10 +1,12 @@
 /**
  * Copyright 2026 by Anysphere Inc.
+ * 
  * Licensed under the MIT License.
+ * 
+ * SPDX-License-Identifier: MIT
  *
  * Author: Thomas Mäder, Castle Ridge Software
  *
- * SPDX-License-Identifier: MIT
  */
 import { defineConfig } from '@vscode/test-cli';
 
