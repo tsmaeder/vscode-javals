@@ -87,11 +87,13 @@
           "type": "string",
           "enum": [
             "javac",
-            "ecj"
+            "ecj",
+            "turbine"
           ],
           "enumDescriptions": [
             "Use the javac-based source indexer (default).",
-            "Use the Eclipse Compiler for Java (ECJ) source indexer."
+            "Use the Eclipse Compiler for Java (ECJ) source indexer.",
+            "Use the Turbine-based source indexer."
           ],
           "default": "javac",
           "description": "Which backend to use for indexing Java sources."
