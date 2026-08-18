@@ -83,18 +83,31 @@
           "default": "off",
           "description": "Traces the communication between VS Code and the JavaLS server."
         },
-        "javals.backend.indexer": {
+        "javals.backend.sourceIndexer": {
           "type": "string",
           "enum": [
             "javac",
             "ecj"
           ],
           "enumDescriptions": [
-            "Use the javac-based indexer (default).",
-            "Use the Eclipse Compiler for Java (ECJ) indexer."
+            "Use the javac-based source indexer (default).",
+            "Use the Eclipse Compiler for Java (ECJ) source indexer."
           ],
           "default": "javac",
-          "description": "Which backend to use for indexing."
+          "description": "Which backend to use for indexing Java sources."
+        },
+        "javals.backend.classIndexer": {
+          "type": "string",
+          "enum": [
+            "asm",
+            "turbine"
+          ],
+          "enumDescriptions": [
+            "Use the ASM-based class-file indexer (default).",
+            "Use the Turbine-based class-file indexer."
+          ],
+          "default": "asm",
+          "description": "Which backend to use for indexing class files (jars / JRT)."
         },
         "javals.backend.compiler": {
           "type": "string",

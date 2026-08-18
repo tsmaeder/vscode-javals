@@ -1,72 +1,87 @@
 # vscode-javals
 
-VS Code extension that launches the `ch.castleridge:java-ls` language server
-over stdio.
+This is a VS Code extension to launch the JavaLS language server.
 
-## How the server jar is located
+## Prerequisites
 
-The extension can run the server from one of two sources, selected by the
-`javals.serverMode` setting:
+- Node.js 18+ and npm
+- Java 17+ (`JAVA_HOME` or `java` on `PATH`)
+- Sibling [java-ls](../java-ls) Maven project (for local/dev server builds)
 
-| Mode      | Jar path                                          | When to use                          |
-| --------- | ------------------------------------------------- | ------------------------------------ |
-| `bundled` | `<extension>/server/java-ls.jar`                  | Normal end-user install from VSIX    |
-| `dev`     | `<devProjectPath>/java-ls/target/java-ls.jar`     | Hacking on the server locally        |
-| `auto`    | Dev jar if present, otherwise the bundled jar     | Default                              |
+Expected layout:
 
-`javals.devProjectPath` defaults to `../java-ls` (relative to the extension's
-install directory / repo parent), which matches the layout in this monorepo:
-
-```
+```xml
 <parent>/
-  vscode-javals/       <- this extension
+  vscode-javals/    ← this extension
   java-ls/
     java-ls/
       target/java-ls.jar
 ```
 
-Additional settings:
+## Build
 
-- `javals.javaHome` — absolute path to a Java 17+ install. Falls back to
-  `JAVA_HOME`, then `java` on `PATH`.
-- `javals.jvmArgs` — extra JVM arguments appended after the required
-  `--add-exports` / `--add-opens` flags.
-- `javals.trace.server` — standard LSP trace level.
+1. Install extension dependencies:
 
-The extension always prepends the `--add-exports` / `--add-opens` flags the
-server needs to reach `jdk.compiler/com.sun.tools.javac.*` internals. JAR
-manifests cannot carry these flags when launched with `java -jar`, so they
-must be on the command line in both bundled and dev modes.
-
-## Dev setup
-
-1. Build the server: in `../java-ls`, run
-
+   ```bash
+   npm ci
    ```
+
+2. Build the language server (from `../java-ls`):
+
+   ```bash
    mvn -pl java-ls -am package
    ```
 
-   This produces `../java-ls/java-ls/target/java-ls.jar`.
+   Produces `../java-ls/java-ls/target/java-ls.jar`.
 
-2. In this repo, press `F5` to launch the Extension Development Host. With
-   the default `javals.serverMode: auto`, the extension will pick up the
-   freshly built dev jar automatically.
+3. Compile the extension:
 
-3. After iterating on the server, rebuild it and run
-   `JavaLS: Restart Language Server` from the command palette.
+   ```bash
+   npm run compile
+   ```
 
-## Packaging
+   For iterative work, use `npm run watch` instead (TypeScript check + esbuild).
 
-`npm run package` builds the extension bundle. `vscode:prepublish` first runs
-`npm run sync-server`, which copies
-`../java-ls/java-ls/target/java-ls.jar` into `./server/java-ls.jar` so that
-the VSIX ships a working bundled server. The source jar must exist before
-packaging — run `mvn -pl java-ls -am package` first.
+## Run
 
-Point the sync at a different sibling project with
-`JAVALS_DEV_PROJECT=../some/other/path npm run sync-server`.
+1. Open this folder in VS Code / Cursor.
+2. Press **F5** (or **Run and Debug → Run Extension**).
+3. In the Extension Development Host, open a Java file — the server starts automatically.
+
+With default `javals.serverMode: auto`, the extension uses the sibling Maven jar when present, otherwise the bundled `server/java-ls.jar`.
+
+After changing the server, rebuild it with Maven and run **JavaLS: Restart Language Server** from the command palette.
+
+## Package (VSIX)
+
+```bash
+# Ensure the server jar exists first (step 2 above)
+npm run package
+```
+
+`vscode:prepublish` runs `npm run sync-server`, which copies
+`../java-ls/java-ls/target/java-ls.jar` → `./server/java-ls.jar`.
+
+Override the source project with:
+
+```bash
+JAVALS_DEV_PROJECT=../some/other/path npm run sync-server
+```
+
+## Settings
+
+| Setting | Default | Purpose |
+| --- | --- | --- |
+| `javals.serverMode` | `auto` | `auto` / `bundled` / `dev` — which jar to launch |
+| `javals.devProjectPath` | `../java-ls` | Sibling Maven project (relative to extension parent) |
+| `javals.javaHome` | _(empty)_ | Java 17+ home; else `JAVA_HOME` / `PATH` |
+| `javals.jvmArgs` | `[]` | Extra JVM args after required `--add-exports` / `--add-opens` |
+| `javals.trace.server` | `off` | LSP trace level |
+| `javals.backend.sourceIndexer` | `javac` | `javac` / `ecj` — compiler used when indexing sources |
+| `javals.backend.classIndexer` | `asm` | `asm` / `turbine` — class-file reader for jars / JRT |
+| `javals.backend.compiler` | `javac` | `javac` / `ecj` — compiler used for analysis |
 
 ## Commands
 
-- `JavaLS: Restart Language Server` (`javals.restartServer`)
-- `JavaLS: Show Output Channel` (`javals.showOutputChannel`)
+- **JavaLS: Restart Language Server** (`javals.restartServer`)
+- **JavaLS: Show Output Channel** (`javals.showOutputChannel`)
