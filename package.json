@@ -2,7 +2,12 @@
   "name": "vscode-javals",
   "displayName": "vscode-javals",
   "description": "JavaLS jvm language server extension",
-  "version": "0.0.1",
+  "publisher": "castleridge",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tsmaeder/vscode-javals"
+  },
+  "version": "0.1.0",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
@@ -15,6 +20,15 @@
   ],
   "main": "./dist/extension.js",
   "contributes": {
+    "resourceLabelFormatters": [
+      {
+        "scheme": "jar",
+        "formatting": {
+          "label": "${scheme}:${path}",
+          "separator": "/"
+        }
+      }
+    ],
     "commands": [
       {
         "command": "javals.restartServer",

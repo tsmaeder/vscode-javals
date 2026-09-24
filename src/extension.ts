@@ -112,7 +112,8 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
 	};
 
 	const clientOptions: LanguageClientOptions = {
-		documentSelector: [{ scheme: 'file', language: 'java' }],
+		documentSelector: [{ scheme: 'file', language: 'java' }, 
+			{ scheme: 'jar', language: 'java' }],
 		outputChannel,
 		initializationOptions: {
 			indexClassFileContents: config.get<boolean>('indexClassFileContents', true),
