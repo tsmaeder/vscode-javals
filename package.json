@@ -97,6 +97,16 @@
           "default": "off",
           "description": "Traces the communication between VS Code and the JavaLS server."
         },
+        "javals.references.inJars": {
+          "type": "boolean",
+          "default": false,
+          "description": "When finding references, also search dependency sources jars. Workspace sources are always searched. Applied on the next configuration change (no restart)."
+        },
+        "javals.references.inJdk": {
+          "type": "boolean",
+          "default": false,
+          "description": "When finding references, also search JDK sources (src.zip). Workspace sources are always searched. Applied on the next configuration change (no restart)."
+        },
         "javals.backend.sourceIndexer": {
           "type": "string",
           "enum": [

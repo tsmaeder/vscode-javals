@@ -11,6 +11,7 @@ import * as path from 'path';
 import * as vscode from 'vscode';
 import JSZip = require('jszip');
 import {
+	DidChangeConfigurationNotification,
 	LanguageClient,
 	LanguageClientOptions,
 	ServerOptions,
@@ -52,6 +53,19 @@ export async function activate(context: vscode.ExtensionContext): Promise<void> 
 		}),
 		vscode.commands.registerCommand('javals.restartServer', async () => {
 			await restartClient(context);
+		}),
+		vscode.workspace.onDidChangeConfiguration((event) => {
+			if (!client || !event.affectsConfiguration('javals.references')) {
+				return;
+			}
+			const config = vscode.workspace.getConfiguration('javals');
+			void client.sendNotification(DidChangeConfigurationNotification.type, {
+				settings: {
+					javals: {
+						references: referencesOptions(config),
+					},
+				},
+			});
 		}),
 	);
 
@@ -118,6 +132,7 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
 		initializationOptions: {
 			indexClassFileContents: config.get<boolean>('indexClassFileContents', true),
 			prunedSourceIndexing: config.get<boolean>('prunedSourceIndexing', true),
+			references: referencesOptions(config),
 			backend: {
 				sourceIndexer: config.get<'javac' | 'ecj' | 'turbine'>('backend.sourceIndexer', 'javac'),
 				classIndexer: config.get<'asm' | 'turbine'>('backend.classIndexer', 'asm'),
@@ -147,6 +162,13 @@ async function restartClient(context: vscode.ExtensionContext): Promise<void> {
 		client = undefined;
 	}
 	await startClient(context);
+}
+
+function referencesOptions(config: vscode.WorkspaceConfiguration): { inJars: boolean; inJdk: boolean } {
+	return {
+		inJars: config.get<boolean>('references.inJars', false),
+		inJdk: config.get<boolean>('references.inJdk', false),
+	};
 }
 
 function resolveJavaExecutable(configuredJavaHome: string): string | undefined {
