@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/tsmaeder/vscode-javals"
   },
-  "version": "0.1.1",
+  "version": "0.2.0",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
@@ -147,6 +147,65 @@
           ],
           "default": "javac",
           "description": "Which backend to use for compilation."
+        },
+        "javals.maven.generatedSourceRules": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "properties": {
+              "pluginKey": {
+                "type": "string",
+                "description": "Maven plugin coordinates as groupId:artifactId."
+              },
+              "goals": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                },
+                "description": "Optional execution goals that must intersect (e.g. add-source). Empty means plugin-level."
+              },
+              "scope": {
+                "type": "string",
+                "enum": [
+                  "main",
+                  "test"
+                ],
+                "description": "Main or test source namespace. Required when adding a rule; optional when disabling."
+              },
+              "configPath": {
+                "type": "string",
+                "description": "Slash-separated path under plugin <configuration>. Required when adding a rule; optional when disabling."
+              },
+              "list": {
+                "type": "boolean",
+                "default": false,
+                "description": "When true, each matching child element is a path (e.g. sources/source)."
+              },
+              "defaultPath": {
+                "type": [
+                  "string",
+                  "null"
+                ],
+                "default": null,
+                "description": "Property-style default when config is absent (e.g. ${project.build.directory}/generated-sources/…)."
+              },
+              "required": {
+                "type": "boolean",
+                "default": false,
+                "description": "When true, skip if neither config nor default yields a path."
+              },
+              "enabled": {
+                "type": "boolean",
+                "default": true,
+                "description": "Set to false to disable matching built-in rules (pluginKey required; optional scope/goals/configPath narrow the match). When true or omitted, the entry adds a rule (needs scope and configPath)."
+              }
+            },
+            "required": [
+              "pluginKey"
+            ]
+          },
+          "default": [],
+          "description": "Extra Maven generated-source rules, or disable built-ins with enabled: false. Applied on language server restart (re-import)."
         }
       }
     }

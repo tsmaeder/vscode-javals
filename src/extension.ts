@@ -138,6 +138,9 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
 				classIndexer: config.get<'asm' | 'turbine'>('backend.classIndexer', 'asm'),
 				compiler: config.get<'javac' | 'ecj'>('backend.compiler', 'javac'),
 			},
+			maven: {
+				generatedSourceRules: config.get<object[]>('maven.generatedSourceRules', []),
+			},
 		}
 	};
 

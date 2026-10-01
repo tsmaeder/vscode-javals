@@ -4,6 +4,9 @@ All notable changes to the "vscode-javals" extension will be documented in this 
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [0.2.0]
+- Added support for importing maven projects
+
 ## [0.1.1]
 - Added suppport for searching references in JDK and jar attached sources
 - Improved "references" performance for "String" to 18 seconds in Trino source
