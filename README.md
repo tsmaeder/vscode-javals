@@ -1,6 +1,7 @@
 # vscode-javals
 
-This is a VS Code extension to launch the JavaLS language server.
+This is a VS Code extension to launch the JavaLS language server. JavaLS is an experimental Java language server
+that is is really fast and scales really well.
 
 ## Prerequisites
 
@@ -10,12 +11,13 @@ This is a VS Code extension to launch the JavaLS language server.
 
 Expected layout:
 
-```xml
+```
 <parent>/
   vscode-javals/    ← this extension
   java-ls/
     java-ls/
       target/java-ls.jar
+      target/mavenimporter.jar
 ```
 
 ## Build
@@ -32,7 +34,8 @@ Expected layout:
    mvn -pl java-ls -am package
    ```
 
-   Produces `../java-ls/java-ls/target/java-ls.jar`.
+   Produces `../java-ls/java-ls/target/java-ls.jar` and
+   `../java-ls/java-ls/target/mavenimporter.jar` (copied beside the LS jar).
 
 3. Compile the extension:
 
@@ -55,12 +58,14 @@ After changing the server, rebuild it with Maven and run **JavaLS: Restart Langu
 ## Package (VSIX)
 
 ```bash
-# Ensure the server jar exists first (step 2 above)
+# Ensure the server jars exist first (step 2 above)
 npm run package
 ```
 
-`vscode:prepublish` runs `npm run sync-server`, which copies
-`../java-ls/java-ls/target/java-ls.jar` → `./server/java-ls.jar`.
+`vscode:prepublish` runs `npm run sync-server`, which copies both jars:
+
+- `../java-ls/java-ls/target/java-ls.jar` → `./server/java-ls.jar`
+- `../java-ls/java-ls/target/mavenimporter.jar` → `./server/mavenimporter.jar`
 
 Override the source project with:
 
