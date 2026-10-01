@@ -82,7 +82,70 @@ JAVALS_DEV_PROJECT=../some/other/path npm run sync-server
 | `javals.backend.sourceIndexer` | `javac` | `javac` / `ecj` / `turbine` — compiler used when indexing sources |
 | `javals.backend.classIndexer` | `asm` | `asm` / `turbine` — class-file reader for jars / JRT |
 | `javals.backend.compiler` | `javac` | `javac` / `ecj` — compiler used for analysis |
-| `javals.maven.generatedSourceRules` | `[]` | Extra Maven generated-source rules, or disable built-ins with `enabled: false` (restart required) |
+| `javals.maven.generatedSourceRules` | `[]` | Extra Maven generated-source rules, or disable built-ins with `enabled: false` (restart required). See [Import process](#import-process). |
+
+## Import process
+
+java-ls does not read `pom.xml` (or other build files) directly. It indexes from an
+[`mbt.json`](https://github.com/scalameta/metals/blob/main-v2/docs/build-tools/mbt.json.md)
+workspace description (sources, jars, and classpath layout). On startup:
+
+1. If a root-level `mbt.json` exists in a workspace folder, that file is used as-is (no import).
+2. Otherwise the server runs each registered build-system importer. Maven is supported today via
+   the bundled `mavenimporter.jar` (next to `java-ls.jar`).
+3. Each importer writes a fragment under `.javals/` (Maven: `.javals/mbt.json.maven`).
+4. Fragments are merged into `.javals/mbt.json`, which the server then loads for indexing.
+5. If no `mbt.json` is found anywhere (root, `.javals/`, or `.metals/` fallback), indexing stays
+   disabled.
+
+The Maven importer scans the workspace for `pom.xml` files, resolves each reactor with an
+embedded Maven instance, and maps projects to Metals-shaped namespaces (main and test as separate
+targets, external jars as `dependencyModules`, workspace modules as `dependsOn`). It skips a full
+re-import when the fragment is newer than every scanned pom unless forced.
+
+### Generated source rules
+
+Maven does not run `generate-sources` during import. Instead the importer applies a registry of
+rules that map known plugins to configuration paths and default directories, then adds those roots
+to each namespace’s `sources` list (even if the directory does not exist yet).
+
+Built-in rules cover modello, `maven-compiler-plugin` annotation-processor output, and
+`build-helper-maven-plugin` `add-source` / `add-test-source`. Extend or disable them with
+`javals.maven.generatedSourceRules` (restart required). The extension passes the array to the
+server; non-empty values are written to `.javals/generated-source-rules.json` for the importer.
+
+Each entry is a JSON object:
+
+| Field | Type | Required | Meaning |
+| --- | --- | --- | --- |
+| `pluginKey` | string | yes | Maven plugin coordinates (`groupId:artifactId`) |
+| `scope` | `"main"` \| `"test"` | for additions | Which namespace receives the root |
+| `configPath` | string | for additions | Slash-separated path under the plugin’s `<configuration>` (e.g. `outputDirectory`, `sources/source`) |
+| `goals` | string[] | no | When set, only executions whose goals intersect apply; empty/omitted → plugin-level config (plus executions that set the path) |
+| `list` | boolean | no | If `true`, each matching child element is a path (default `false`) |
+| `defaultPath` | string | no | Used when config is absent; supports `${project.build.directory}` / `${project.basedir}` |
+| `required` | boolean | no | If `true`, skip when neither config nor default yields a path (default `false`) |
+| `enabled` | boolean | no | `"enabled": false` disables matching built-ins instead of adding a rule (default `true`) |
+
+Disable matching: `pluginKey` is required; optional `scope`, `goals`, and/or `configPath` narrow
+which built-in(s) are removed. Additions need `pluginKey`, `scope`, and `configPath`.
+
+Example:
+
+```json
+"javals.maven.generatedSourceRules": [
+  {
+    "pluginKey": "org.antlr:antlr4-maven-plugin",
+    "scope": "main",
+    "configPath": "outputDirectory",
+    "defaultPath": "${project.build.directory}/generated-sources/antlr4"
+  },
+  {
+    "pluginKey": "org.codehaus.modello:modello-maven-plugin",
+    "enabled": false
+  }
+]
+```
 
 ## Commands
 
