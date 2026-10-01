@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/tsmaeder/vscode-javals"
   },
-  "version": "0.2.0",
+  "version": "0.2.1",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
@@ -147,6 +147,17 @@
           ],
           "default": "javac",
           "description": "Which backend to use for compilation."
+        },
+        "javals.importers": {
+          "type": "object",
+          "additionalProperties": {
+            "type": "string",
+            "description": "Importer script for that build-system id: a .jar path is run with the server's java -jar; any other non-empty value is a shell command line. Always receives <workspace> --output <.javals/mbt.json.<id>>."
+          },
+          "default": {
+            "maven": "mavenimporter.jar"
+          },
+          "markdownDescription": "Map of **arbitrary** build-system id → importer script (jar path or shell command). Every entry is run at workspace init; the id becomes the fragment suffix (`.javals/mbt.json.<id>`). Relative jar paths and the process working directory for shell commands resolve against the **java-ls install directory** (folder containing `java-ls.jar`, typically the extension's `server/`). Absolute paths are used as-is. Default seeds `maven` → `mavenimporter.jar` (bundled). Add other ids (e.g. `gradle`) to run additional importers. Applied on language server restart (re-import)."
         },
         "javals.maven.generatedSourceRules": {
           "type": "array",

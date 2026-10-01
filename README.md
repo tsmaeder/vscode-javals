@@ -87,6 +87,7 @@ JAVALS_DEV_PROJECT=../some/other/path npm run sync-server
 | `javals.backend.sourceIndexer` | `javac` | `javac` / `ecj` / `turbine` — compiler used when indexing sources |
 | `javals.backend.classIndexer` | `asm` | `asm` / `turbine` — class-file reader for jars / JRT |
 | `javals.backend.compiler` | `javac` | `javac` / `ecj` — compiler used for analysis |
+| `javals.importers` | `{ "maven": "mavenimporter.jar" }` | Map of arbitrary build-system id → importer script. Every entry runs at init. Relative paths resolve against the java-ls install directory. See [Import process](#import-process). |
 | `javals.maven.generatedSourceRules` | `[]` | Extra Maven generated-source rules, or disable built-ins with `enabled: false` (restart required). See [Import process](#import-process). |
 
 ## Import process
@@ -96,12 +97,35 @@ java-ls does not read `pom.xml` (or other build files) directly. It indexes from
 workspace description (sources, jars, and classpath layout). On startup:
 
 1. If a root-level `mbt.json` exists in a workspace folder, that file is used as-is (no import).
-2. Otherwise the server runs each registered build-system importer. Maven is supported today via
-   the bundled `mavenimporter.jar` (next to `java-ls.jar`).
-3. Each importer writes a fragment under `.javals/` (Maven: `.javals/mbt.json.maven`).
+2. Otherwise the server runs each importer listed in `javals.importers` (default seeds
+   Maven; add any other id to run additional scripts).
+3. Each importer writes a fragment under `.javals/` (e.g. Maven: `.javals/mbt.json.maven`).
 4. Fragments are merged into `.javals/mbt.json`, which the server then loads for indexing.
 5. If no `mbt.json` is found anywhere (root, `.javals/`, or `.metals/` fallback), indexing stays
    disabled.
+
+### Importer scripts (`javals.importers`)
+
+`javals.importers` is a free-form map of build-system id → script string. Keys are not
+restricted: any id you add is run at workspace init and writes `.javals/mbt.json.<id>`.
+The default map seeds only `maven` → `mavenimporter.jar` (bundled beside `java-ls.jar`).
+Values are resolved as follows:
+
+| Value | Behavior |
+| --- | --- |
+| Ends with `.jar` | Run with the LS JVM: `java -jar <path> <workspace> --output <.javals/mbt.json.<id>>`. Absolute paths are used as-is; **relative paths resolve against the java-ls install directory** (folder containing `java-ls.jar`, e.g. the extension's `server/`). |
+| Anything else | Treated as a shell command line (`cmd.exe /C` on Windows, `/bin/sh -c` elsewhere). The importer process working directory is the java-ls install directory, so relative script paths resolve there too. The server appends `<workspace> --output <fragment>` (and optionally `--generated-source-rules` for Maven). |
+
+Examples:
+
+```json
+{
+  "javals.importers": {
+    "maven": "mavenimporter.jar",
+    "gradle": "/opt/tools/gradle-mbt-import.sh"
+  }
+}
+```
 
 The Maven importer scans the workspace for `pom.xml` files, resolves each reactor with an
 embedded Maven instance, and maps projects to Metals-shaped namespaces (main and test as separate
