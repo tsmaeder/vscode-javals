@@ -134,9 +134,9 @@ async function startClient(context: vscode.ExtensionContext): Promise<void> {
 			prunedSourceIndexing: config.get<boolean>('prunedSourceIndexing', true),
 			references: referencesOptions(config),
 			backend: {
-				sourceIndexer: config.get<'javac' | 'ecj' | 'turbine'>('backend.sourceIndexer', 'javac'),
-				classIndexer: config.get<'asm' | 'turbine'>('backend.classIndexer', 'asm'),
-				compiler: config.get<'javac' | 'ecj'>('backend.compiler', 'javac'),
+				sourceIndexer: config.get<'javac' | 'ecj' | 'turbine'>('backend.sourceIndexer', 'turbine'),
+				classIndexer: config.get<'asm' | 'turbine'>('backend.classIndexer', 'turbine'),
+				compiler: config.get<'javac' | 'ecj'>('backend.compiler', 'ecj'),
 			},
 			importers: config.get<Record<string, string>>('importers', { maven: 'mavenimporter.jar' }),
 			maven: {

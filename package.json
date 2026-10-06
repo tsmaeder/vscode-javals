@@ -7,7 +7,7 @@
     "type": "git",
     "url": "https://github.com/tsmaeder/vscode-javals"
   },
-  "version": "0.2.1",
+  "version": "0.2.3",
   "license": "MIT",
   "engines": {
     "vscode": "^1.85.0"
@@ -115,11 +115,11 @@
             "turbine"
           ],
           "enumDescriptions": [
-            "Use the javac-based source indexer (default).",
+            "Use the javac-based source indexer.",
             "Use the Eclipse Compiler for Java (ECJ) source indexer.",
-            "Use the Turbine-based source indexer."
+            "Use the Turbine-based source indexer (default)."
           ],
-          "default": "javac",
+          "default": "turbine",
           "description": "Which backend to use for indexing Java sources."
         },
         "javals.backend.classIndexer": {
@@ -129,10 +129,10 @@
             "turbine"
           ],
           "enumDescriptions": [
-            "Use the ASM-based class-file indexer (default).",
-            "Use the Turbine-based class-file indexer."
+            "Use the ASM-based class-file indexer.",
+            "Use the Turbine-based class-file indexer (default)."
           ],
-          "default": "asm",
+          "default": "turbine",
           "description": "Which backend to use for indexing class files (jars / JRT)."
         },
         "javals.backend.compiler": {
@@ -142,10 +142,10 @@
             "ecj"
           ],
           "enumDescriptions": [
-            "Use the javac-based compiler (default).",
-            "Use the Eclipse Compiler for Java (ECJ)."
+            "Use the javac-based compiler.",
+            "Use the Eclipse Compiler for Java (ECJ) (default)."
           ],
-          "default": "javac",
+          "default": "ecj",
           "description": "Which backend to use for compilation."
         },
         "javals.importers": {

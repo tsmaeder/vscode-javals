@@ -84,9 +84,9 @@ JAVALS_DEV_PROJECT=../some/other/path npm run sync-server
 | `javals.trace.server` | `off` | LSP trace level |
 | `javals.references.inJars` | `false` | Also search dependency sources jars when finding references |
 | `javals.references.inJdk` | `false` | Also search JDK sources when finding references |
-| `javals.backend.sourceIndexer` | `javac` | `javac` / `ecj` / `turbine` — compiler used when indexing sources |
-| `javals.backend.classIndexer` | `asm` | `asm` / `turbine` — class-file reader for jars / JRT |
-| `javals.backend.compiler` | `javac` | `javac` / `ecj` — compiler used for analysis |
+| `javals.backend.sourceIndexer` | `turbine` | `javac` / `ecj` / `turbine` — compiler used when indexing sources |
+| `javals.backend.classIndexer` | `turbine` | `asm` / `turbine` — class-file reader for jars / JRT |
+| `javals.backend.compiler` | `ecj` | `javac` / `ecj` — compiler used for analysis |
 | `javals.importers` | `{ "maven": "mavenimporter.jar" }` | Map of arbitrary build-system id → importer script. Every entry runs at init. Relative paths resolve against the java-ls install directory. See [Import process](#import-process). |
 | `javals.maven.generatedSourceRules` | `[]` | Extra Maven generated-source rules, or disable built-ins with `enabled: false` (restart required). See [Import process](#import-process). |
 
